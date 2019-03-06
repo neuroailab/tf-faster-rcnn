@@ -16,6 +16,7 @@ import argparse
 import pprint
 import numpy as np
 import sys
+import pdb
 
 import tensorflow as tf
 from nets.vgg16 import vgg16

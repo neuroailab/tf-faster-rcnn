@@ -13,6 +13,7 @@ from tensorflow.contrib.slim import losses
 from tensorflow.contrib.slim import arg_scope
 
 import numpy as np
+import pdb
 
 from layer_utils.snippets import generate_anchors_pre, generate_anchors_pre_tf
 from layer_utils.proposal_layer import proposal_layer, proposal_layer_tf
@@ -239,7 +240,9 @@ class Network(object):
       initializer = tf.random_normal_initializer(mean=0.0, stddev=0.01)
       initializer_bbox = tf.random_normal_initializer(mean=0.0, stddev=0.001)
 
+    pdb.set_trace()
     net_conv = self._image_to_head(is_training)
+    pdb.set_trace()
     with tf.variable_scope(self._scope, self._scope):
       # build the anchors for the image
       self._anchor_component()
