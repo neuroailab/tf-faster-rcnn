@@ -28,21 +28,25 @@ class alexnet(Network):
         'training': False, 
         'fused': True,
         }
+    # BGR order std
+    imagenet_std = np.array([0.225, 0.224, 0.229], dtype=np.float32)
+    input_image = self._image / 255 / imagenet_std
+    #input_image = tf.Print(input_image, [tf.shape(input_image)], message='Image shape', summarize=10)
     with tf.variable_scope(self._scope, self._scope, reuse=reuse):
-      net = slim.conv2d(self._image, 64, [11, 11], 4, padding='VALID',
+      net = slim.conv2d(input_image, 64, [11, 11], 4, padding='SAME',
                         scope='conv1', activation_fn=None)
       net = tf.layers.batch_normalization(
               inputs=net,
               name='conv1', **batch_norm_kwargs)
       net = tf.nn.relu(net)
-      net = slim.max_pool2d(net, [3, 3], 2, scope='pool1')
+      net = slim.max_pool2d(net, [3, 3], 2, scope='pool1', padding='SAME')
 
       net = slim.conv2d(net, 192, [5, 5], scope='conv2', activation_fn=None)
       net = tf.layers.batch_normalization(
               inputs=net,
               name='conv2', **batch_norm_kwargs)
       net = tf.nn.relu(net)
-      net = slim.max_pool2d(net, [3, 3], 2, scope='pool2')
+      net = slim.max_pool2d(net, [3, 3], 2, scope='pool2', padding='SAME')
 
       net = slim.conv2d(net, 384, [3, 3], scope='conv3', activation_fn=None)
       net = tf.layers.batch_normalization(
@@ -62,6 +66,7 @@ class alexnet(Network):
               name='conv5', **batch_norm_kwargs)
       net = tf.nn.relu(net)
 
+    #net = tf.Print(net, [tf.shape(net)], message='Net shape', summarize=10)
     self._act_summaries.append(net)
     self._layers['head'] = net
     return net
@@ -89,3 +94,43 @@ class alexnet(Network):
               name='fc7', **batch_norm_kwargs)
       net = tf.nn.relu(net)
     return fc7
+
+  def get_variables_to_restore(self, variables, var_keep_dic):
+    variables_to_restore = []
+
+    for v in variables:
+      # exclude the conv weights that are fc weights in vgg16
+      if v.name == (self._scope + '/fc6/weights:0') or \
+         v.name == (self._scope + '/fc7/weights:0'):
+        self._variables_to_fix[v.name] = v
+        continue
+      # exclude the first conv layer to swap RGB to BGR
+      if v.name == (self._scope + '/conv1/weights:0'):
+        self._variables_to_fix[v.name] = v
+        continue
+      if v.name.split(':')[0] in var_keep_dic and 'Momentum' not in v.name:
+        print('Variables restored: %s' % v.name)
+        variables_to_restore.append(v)
+
+    return variables_to_restore
+
+  def fix_variables(self, sess, pretrained_model):
+    print('Fix AlexNet layers..')
+    with tf.variable_scope('Fix_AlexNet') as scope:
+      with tf.device("/cpu:0"):
+        # fix the vgg16 issue from conv weights to fc weights
+        # fix RGB to BGR
+        fc6_conv = tf.get_variable("fc6_conv", [5, 5, 256, 4096], trainable=False)
+        fc7_conv = tf.get_variable("fc7_conv", [1, 1, 4096, 4096], trainable=False)
+        conv1_rgb = tf.get_variable("conv1_rgb", [11, 11, 3, 64], trainable=False)
+        restorer_fc = tf.train.Saver({self._scope + "/fc6/weights": fc6_conv, 
+                                      self._scope + "/fc7/weights": fc7_conv,
+                                      self._scope + "/conv1/weights": conv1_rgb})
+        restorer_fc.restore(sess, pretrained_model)
+
+        sess.run(tf.assign(self._variables_to_fix[self._scope + '/fc6/weights:0'], tf.reshape(fc6_conv, 
+                            self._variables_to_fix[self._scope + '/fc6/weights:0'].get_shape())))
+        sess.run(tf.assign(self._variables_to_fix[self._scope + '/fc7/weights:0'], tf.reshape(fc7_conv, 
+                            self._variables_to_fix[self._scope + '/fc7/weights:0'].get_shape())))
+        sess.run(tf.assign(self._variables_to_fix[self._scope + '/conv1/weights:0'], 
+                            tf.reverse(conv1_rgb, [2])))

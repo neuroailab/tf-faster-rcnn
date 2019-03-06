@@ -23,6 +23,7 @@ import time
 
 import tensorflow as tf
 from tensorflow.python import pywrap_tensorflow
+import pdb
 
 class SolverWrapper(object):
   """
