@@ -104,6 +104,10 @@ if __name__ == '__main__':
     net = alexnet()
   elif args.net == 'alexnet_nwd':
     net = alexnet()
+  elif args.net == 'alexnet_swd':
+    net = alexnet()
+  elif args.net == 'alexnet_drp':
+    net = alexnet(with_dropout=True)
   else:
     raise NotImplementedError
 
