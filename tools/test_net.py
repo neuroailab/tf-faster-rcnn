@@ -19,6 +19,7 @@ import tensorflow as tf
 from nets.vgg16 import vgg16
 from nets.resnet_v1 import resnetv1
 from nets.mobilenet_v1 import mobilenetv1
+from nets.alexnet import alexnet
 
 def parse_args():
   """
@@ -99,6 +100,10 @@ if __name__ == '__main__':
     net = resnetv1(num_layers=152)
   elif args.net == 'mobile':
     net = mobilenetv1()
+  elif args.net == 'alexnet':
+    net = alexnet()
+  elif args.net == 'alexnet_nwd':
+    net = alexnet()
   else:
     raise NotImplementedError
 

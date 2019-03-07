@@ -15,11 +15,12 @@ trunc_normal = lambda stddev: tf.truncated_normal_initializer(0.0, stddev)
 
 
 class alexnet(Network):
-  def __init__(self):
+  def __init__(self, with_dropout=False):
     Network.__init__(self)
     self._feat_stride = [16, ]
     self._feat_compress = [1. / float(self._feat_stride[0]), ]
     self._scope = 'alexnet_v2'
+    self.with_dropout = with_dropout
 
   def _image_to_head(self, is_training, reuse=None):
     batch_norm_kwargs = {
@@ -86,6 +87,9 @@ class alexnet(Network):
               inputs=fc6,
               name='fc6', **batch_norm_kwargs)
       net = tf.nn.relu(net)
+      if self.with_dropout and is_training:
+        net = slim.dropout(net, keep_prob=0.5, is_training=True, 
+                            scope='dropout6')
 
       fc7 = slim.fully_connected(
           net, 4096, scope='fc7', activation_fn=None)
@@ -93,7 +97,10 @@ class alexnet(Network):
               inputs=fc7,
               name='fc7', **batch_norm_kwargs)
       net = tf.nn.relu(net)
-    return fc7
+      if self.with_dropout and is_training:
+        net = slim.dropout(net, keep_prob=0.5, is_training=True, 
+                            scope='dropout7')
+    return net
 
   def get_variables_to_restore(self, variables, var_keep_dic):
     variables_to_restore = []
