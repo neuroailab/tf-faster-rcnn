@@ -17,6 +17,7 @@ import time, os, sys
 
 import tensorflow as tf
 from nets.vgg16 import vgg16
+from nets.vgg16_inst import vgg16_inst
 from nets.resnet_v1 import resnetv1
 from nets.mobilenet_v1 import mobilenetv1
 from nets.alexnet import alexnet
@@ -92,6 +93,8 @@ if __name__ == '__main__':
   # load network
   if args.net == 'vgg16':
     net = vgg16()
+  if args.net == 'vgg16_inst':
+    net = vgg16_inst()
   elif args.net == 'res50':
     net = resnetv1(num_layers=50)
   elif args.net == 'res101':
