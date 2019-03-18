@@ -76,7 +76,7 @@ class vgg16_inst(Network):
     normalizer_params = {
         'momentum': 0.997,
         'epsilon': 1e-5,
-        'training': is_training,
+        'training': False,
         'fused': True}
     kwargs = {
         'normalizer_fn': normalizer_fn,
