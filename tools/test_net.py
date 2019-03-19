@@ -21,6 +21,7 @@ from nets.vgg16_inst import vgg16_inst
 from nets.resnet_v1 import resnetv1
 from nets.mobilenet_v1 import mobilenetv1
 from nets.alexnet import alexnet
+from nets.resnet_inst import resnetv2
 
 def parse_args():
   """
@@ -97,6 +98,8 @@ if __name__ == '__main__':
     net = vgg16_inst()
   elif args.net == 'res50':
     net = resnetv1(num_layers=50)
+  elif args.net == 'res50_inst':
+    net = resnetv2(num_layers=50)
   elif args.net == 'res101':
     net = resnetv1(num_layers=101)
   elif args.net == 'res152':
