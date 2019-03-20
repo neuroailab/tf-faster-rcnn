@@ -117,6 +117,8 @@ if __name__ == '__main__':
     net = alexnet_tf()
   elif args.net == 'alexnet':
     net = alexnet()
+  elif args.net == 'alexnet_ctl':
+    net = alexnet()
   elif args.net == 'alexnet_nwd':
     net = alexnet()
   elif args.net == 'alexnet_swd':
