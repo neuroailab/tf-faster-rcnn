@@ -21,6 +21,7 @@ from nets.vgg16_inst import vgg16_inst
 from nets.resnet_v1 import resnetv1
 from nets.mobilenet_v1 import mobilenetv1
 from nets.alexnet import alexnet
+from nets.alexnet_tf import alexnet_tf
 from nets.resnet_inst import resnetv2
 
 def parse_args():
@@ -110,6 +111,8 @@ if __name__ == '__main__':
     net = resnetv1(num_layers=152)
   elif args.net == 'mobile':
     net = mobilenetv1()
+  elif args.net == 'alexnet_tf':
+    net = alexnet_tf()
   elif args.net == 'alexnet':
     net = alexnet()
   elif args.net == 'alexnet_nwd':
