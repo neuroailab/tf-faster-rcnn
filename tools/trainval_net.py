@@ -134,6 +134,8 @@ if __name__ == '__main__':
     net = vgg16_inst()
   elif args.net == 'vgg16_inst_rpn':
     net = vgg16_inst()
+  elif args.net == 'vgg16_inst_ctl':
+    net = vgg16_inst()
   elif args.net == 'res50':
     net = resnetv1(num_layers=50)
   elif args.net == 'res50_inst':
