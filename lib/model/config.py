@@ -21,6 +21,9 @@ __C.TRAIN = edict()
 # Initial learning rate
 __C.TRAIN.LEARNING_RATE = 0.001
 
+# ENABLE_BATCH_NORM
+__C.TRAIN.ENABLE_BATCH_NORM = False
+
 # Momentum
 __C.TRAIN.MOMENTUM = 0.9
 

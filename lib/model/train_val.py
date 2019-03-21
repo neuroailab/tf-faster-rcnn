@@ -129,21 +129,23 @@ class SolverWrapper(object):
       self.optimizer = tf.train.MomentumOptimizer(lr, cfg.TRAIN.MOMENTUM)
 
       # Compute the gradients with regard to the loss
-      gvs = self.optimizer.compute_gradients(loss)
-      # Double the gradient of the bias if set
-      if cfg.TRAIN.DOUBLE_BIAS:
-        final_gvs = []
-        with tf.variable_scope('Gradient_Mult') as scope:
-          for grad, var in gvs:
-            scale = 1.
-            if cfg.TRAIN.DOUBLE_BIAS and '/biases:' in var.name:
-              scale *= 2.
-            if not np.allclose(scale, 1.0):
-              grad = tf.multiply(grad, scale)
-            final_gvs.append((grad, var))
-        train_op = self.optimizer.apply_gradients(final_gvs)
-      else:
-        train_op = self.optimizer.apply_gradients(gvs)
+      update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+      with tf.control_dependencies(update_ops):
+        gvs = self.optimizer.compute_gradients(loss)
+        # Double the gradient of the bias if set
+        if cfg.TRAIN.DOUBLE_BIAS:
+          final_gvs = []
+          with tf.variable_scope('Gradient_Mult') as scope:
+            for grad, var in gvs:
+              scale = 1.
+              if cfg.TRAIN.DOUBLE_BIAS and '/biases:' in var.name:
+                scale *= 2.
+              if not np.allclose(scale, 1.0):
+                grad = tf.multiply(grad, scale)
+              final_gvs.append((grad, var))
+          train_op = self.optimizer.apply_gradients(final_gvs)
+        else:
+          train_op = self.optimizer.apply_gradients(gvs)
 
       # We will handle the snapshots ourselves
       self.saver = tf.train.Saver(max_to_keep=100000)

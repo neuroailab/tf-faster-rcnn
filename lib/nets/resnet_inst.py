@@ -37,11 +37,15 @@ def batch_norm(inputs, training, data_format):
   if BATCH_NORM_COUNTER > 0:
     name += '_%i' % BATCH_NORM_COUNTER
   BATCH_NORM_COUNTER += 1
+  batch_enabled = cfg.TRAIN.ENABLE_BATCH_NORM and training
   return tf.layers.batch_normalization(
       inputs=inputs, axis=1 if data_format == 'channels_first' else 3,
       momentum=_BATCH_NORM_DECAY, epsilon=_BATCH_NORM_EPSILON, center=True,
-      scale=True, training=False, trainable=False, name=name,
+      scale=True, 
+      training=batch_enabled,
+      name=name,
       fused=True)
+      #trainable=batch_enabled,
 
 
 def fixed_padding(inputs, kernel_size, data_format):

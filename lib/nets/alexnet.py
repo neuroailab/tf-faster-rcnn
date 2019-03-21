@@ -12,12 +12,6 @@ from nets.network import Network
 from model.config import cfg
 slim = tf.contrib.slim
 trunc_normal = lambda stddev: tf.truncated_normal_initializer(0.0, stddev)
-batch_norm_kwargs = {
-    'momentum': 0.997, 
-    'epsilon': 1e-5, 
-    'training': False, 
-    'fused': True,
-    }
 
 
 class alexnet(Network):
@@ -29,6 +23,13 @@ class alexnet(Network):
     self.with_dropout = with_dropout
 
   def _image_to_head(self, is_training, reuse=None):
+    batch_enabled = cfg.TRAIN.ENABLE_BATCH_NORM and is_training
+    batch_norm_kwargs = {
+        'momentum': 0.997, 
+        'epsilon': 1e-5, 
+        'training': batch_enabled, 
+        'fused': True,
+        }
     # BGR order std
     imagenet_std = np.array([0.225, 0.224, 0.229], dtype=np.float32)
     input_image = self._image / 255 / imagenet_std
@@ -73,6 +74,13 @@ class alexnet(Network):
     return net
 
   def _head_to_tail(self, pool5, is_training, reuse=None):
+    batch_enabled = cfg.TRAIN.ENABLE_BATCH_NORM and is_training
+    batch_norm_kwargs = {
+        'momentum': 0.997, 
+        'epsilon': 1e-5, 
+        'training': batch_enabled, 
+        'fused': True,
+        }
     with tf.variable_scope(self._scope, self._scope, reuse=reuse):
       pool5_flat = slim.flatten(pool5, scope='flatten')
       fc6 = slim.fully_connected(

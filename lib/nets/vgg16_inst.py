@@ -21,10 +21,11 @@ class vgg16_inst(Network):
 
   def _image_to_head(self, is_training, reuse=None):
     normalizer_fn = tf.layers.batch_normalization
+    batch_enabled = cfg.TRAIN.ENABLE_BATCH_NORM and is_training
     normalizer_params = {
         'momentum': 0.997,
         'epsilon': 1e-5,
-        'training': False,
+        'training': batch_enabled,
         'fused': True}
     kwargs = {
         'normalizer_fn': normalizer_fn,
@@ -72,11 +73,12 @@ class vgg16_inst(Network):
     return net
 
   def _head_to_tail(self, pool5, is_training, reuse=None):
+    batch_enabled = cfg.TRAIN.ENABLE_BATCH_NORM and is_training
     normalizer_fn = tf.layers.batch_normalization
     normalizer_params = {
         'momentum': 0.997,
         'epsilon': 1e-5,
-        'training': False,
+        'training': batch_enabled,
         'fused': True}
     kwargs = {
         'normalizer_fn': normalizer_fn,
